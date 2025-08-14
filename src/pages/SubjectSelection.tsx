@@ -38,8 +38,9 @@ const SubjectSelection = () => {
 
   const startMatching = () => {
     if (selectedSubjects.length > 0) {
-      localStorage.setItem('selectedSubjects', JSON.stringify(selectedSubjects));
-      navigate('/matching');
+      // Store selected subjects in localStorage for fallback mechanism
+      localStorage.setItem('selected_subjects', JSON.stringify(selectedSubjects));
+      navigate('/matching', { state: { subjects: selectedSubjects } });
     }
   };
 

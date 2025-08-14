@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# Match My Study
+
+A real-time study partner matching application that helps students find study partners based on shared subjects.
 
 ## Project info
 
@@ -32,7 +34,14 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Configure environment variables
+# Create a .env file in the root directory with the following variables:
+# VITE_MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
+# VITE_SOCKET_PORT=3001
+# VITE_SOCKET_SERVER_URL=http://localhost:3001
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
+# This will start both the frontend and Socket.IO server
 npm run dev
 ```
 
@@ -59,6 +68,9 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- MongoDB for database storage
+- Socket.IO for real-time features
+- Express for backend server
 
 ## How can I deploy this project?
 
@@ -71,3 +83,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## MongoDB and Socket.IO Implementation
+
+This project has been migrated from Supabase to use MongoDB for data storage and Socket.IO for real-time features. The migration preserves all functionality while providing more control over the backend implementation.
+
+### Features
+
+- **MongoDB Integration**: Stores lobbies, messages, and user data
+- **Socket.IO Real-time**: Handles presence tracking and real-time messaging
+- **Express Backend**: Serves the Socket.IO server
+
+### Running the Socket.IO Server
+
+The Socket.IO server is automatically started when running `npm run dev`. You can also run it separately with:
+
+```sh
+npm run server
+```

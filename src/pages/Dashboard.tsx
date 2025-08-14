@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "@/integrations/user/userUtils";
+import { trackPresence } from "@/integrations/realtime/socketService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,18 +20,9 @@ const Dashboard = () => {
   const topicKey = useMemo(() => makeTopicKey(study), [study]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const uid = session?.user?.id || null;
-      setUserId(uid);
-      if (!uid) navigate("/auth", { replace: true });
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const uid = session?.user?.id || null;
-      setUserId(uid);
-      if (!uid) navigate("/auth", { replace: true });
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    const user = getCurrentUser();
+    setUserId(user.id);
+  }, []);
 
   useEffect(() => {
     document.title = "Dashboard – Study Match";
@@ -38,20 +30,23 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!online || !userId || !topicKey) return;
-    const channel = supabase
-      .channel(`study:${topicKey}`, { config: { presence: { key: userId } } })
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        setPresenceState(state as any);
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ user_id: userId, online_at: new Date().toISOString() });
+    
+    const presence = trackPresence(`study:${topicKey}`);
+    
+    presence.onSync((users) => {
+      const formattedUsers = users.reduce((acc, user) => {
+        if (!acc[user.id]) {
+          acc[user.id] = [];
         }
-      });
-
+        acc[user.id].push(user);
+        return acc;
+      }, {} as Record<string, any[]>);
+      
+      setPresenceState(formattedUsers);
+    });
+    
     return () => {
-      supabase.removeChannel(channel);
+      presence.leave();
       setPresenceState({});
     };
   }, [online, userId, topicKey]);
@@ -96,7 +91,7 @@ const Dashboard = () => {
               <CardTitle>Group Chat</CardTitle>
             </CardHeader>
             <CardContent>
-              <ChatPanel channelName={`group:${topicKey}`} />
+              <ChatPanel roomId={`group:${topicKey}`} />
             </CardContent>
           </Card>
 
