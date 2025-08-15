@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
 // Get the Socket.IO server URL from environment variables or use default
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_SERVER_URL || 'http://localhost:3001';
 
 // Create a socket instance
 export const socket = io(SOCKET_URL);
