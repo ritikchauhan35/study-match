@@ -78,6 +78,9 @@ async function start() {
         return res.status(404).json({ message: 'Lobby not found' });
       }
 
+      // Emit a real-time event to notify clients
+      req.app.get('io').to(id).emit('user-joined', updatedLobby);
+
       res.json(updatedLobby);
     } catch (error) {
       console.error('Error updating lobby:', error);
@@ -112,6 +115,9 @@ async function start() {
       methods: ["GET", "POST"]
     }
   });
+
+  // Make io accessible to our router
+  app.set('io', io);
 
   // --- Socket.IO Handlers (Simplified) ---
   io.on('connection', (socket) => {
